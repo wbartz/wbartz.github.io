@@ -5,13 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 
 export default async function Home() {
+	let repos: Repository[] = []
 	const profile: Profile = await fetch(
 		'https://api.github.com/users/wbartz',
 	).then((res) => res.json())
 
-	const repos: Repository[] = await fetch(profile.repos_url).then((res) =>
-		res.json(),
-	)
+	if (profile && profile.repos_url) {
+		repos = await fetch(profile.repos_url).then((res) => res.json())
+	}
 
 	return (
 		<Layout profile={profile}>
@@ -35,28 +36,30 @@ export default async function Home() {
 						Repositories
 					</h2>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						{repos.map((project) => (
-							<Link
-								href={project.clone_url}
-								target={`_blank`}
-								key={project.id}
-								className="bg-gray-800 rounded-lg shadow-md overflow-hidden"
-							>
-								<Image
-									src={`/placeholder.svg?height=200&width=400&text=Project+${project.full_name}`}
-									alt={`Project ${project.name}`}
-									width={400}
-									height={200}
-									className="w-full h-48 object-cover"
-								/>
-								<div className="p-4">
-									<h3 className="text-xl font-semibold mb-2 text-gray-100">
-										{project.name}
-									</h3>
-									<p className="text-gray-300">{project.description}</p>
-								</div>
-							</Link>
-						))}
+						{repos &&
+							repos.length > 0 &&
+							repos.map((project) => (
+								<Link
+									href={project.clone_url!}
+									target={`_blank`}
+									key={project.id}
+									className="bg-gray-800 rounded-lg shadow-md overflow-hidden"
+								>
+									<Image
+										src={`/placeholder.svg?height=200&width=400&text=Project+${project.full_name}`}
+										alt={`Project ${project.name}`}
+										width={400}
+										height={200}
+										className="w-full h-48 object-cover"
+									/>
+									<div className="p-4">
+										<h3 className="text-xl font-semibold mb-2 text-gray-100">
+											{project.name}
+										</h3>
+										<p className="text-gray-300">{project.description}</p>
+									</div>
+								</Link>
+							))}
 					</div>
 				</div>
 			</section>
